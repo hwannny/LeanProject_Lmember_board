@@ -13,16 +13,21 @@
 <%
 	String pageNum = request.getParameter( "pageNum" );
 	int num = Integer.parseInt( request.getParameter( "num" ) );
+	int number = Integer.parseInt( request.getParameter( "number" ) );
 %>
 <%
-	BoardDBBean boardDao = BoardDBBean.getInstance();
+	BoardDBBean boardDao = BoardDBBean.getInstance();	
 	BoardDataBean boardDto = boardDao.getArticle( num );
+	if( boardDto.getIp().equals(request.getRemoteAddr() )){
+		boardDao.addCount( num );
+	}
+	
 %>
 
 <table>
 	<tr>
 		<th> <%=str_number%> </th>
-		<td align="center"> <%=boardDto.getNum()%> </td>
+		<td align="center"> <%=number%> </td>
 		<th> <%=str_readcount%> </th>
 		<td align="center"> <%=boardDto.getReadcount()%> </td>		
 	</tr>

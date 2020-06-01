@@ -257,6 +257,31 @@ public class BoardDBBean {
 		return article;
 	}//getAricle
 	
+	
+	public void addCount( int num ) {
+		Connection con  = null;
+		PreparedStatement pstmt = null;
+		try {
+			con = getConnection();
+			String sql = "update board set readcount=readcount+1 where num=?";
+			pstmt = con.prepareStatement(sql);
+			pstmt.setInt(1, num);
+			pstmt.executeQuery();
+			
+		} catch (NamingException e) {
+			e.printStackTrace();
+		} catch (SQLException e) {
+			e.printStackTrace();
+		}finally {
+			try {
+				if( pstmt !=null ) pstmt.close();
+				if( con != null ) con.close();
+			} catch( SQLException e ) {
+				e.printStackTrace();
+			}
+		}
+	}//addcount
+	
 } // class
 
 

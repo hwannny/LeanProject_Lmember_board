@@ -10,14 +10,21 @@
 
 
 	<%
-	int pageSize = 5; 				//한페이지당 출력한 글개수 
+	int pageSize = 3; 					//한 페이지당 출력한 글 개수 
+
 	
-	int cnt=0; 							//글개수
 	String pageNum = null ;		//현재페이지
+	int cnt=0; 							//글개수
 	int currentPage = 0;				//계산용 현재페이지
 	int start = 0; 						//현재 페이지 시작 rownum(db에서 가져올)
 	int end = 0;							//현재 페이지 끝   rownum(db에서 가져올)
 	int number = 0;					//출력용 글번호
+	
+	int pageBlock = 3; 				//한 번에 출력할 페이지 개수
+	int startPage = 0;					//시작 페이지	
+	int endPage = 0;					//끝 페이지
+	int pageCount = 0;				//카운트 변수
+	
 	%>
 	
 	
@@ -31,10 +38,21 @@
 	
 	currentPage = Integer.parseInt( pageNum );
 	start = ( currentPage - 1 )*pageSize +1;  	//내가 5페이지 보겠다고 가정하면 ( 5-1 ) *10 +1 =41;
-	end = start + pageSize -1;						// 41+10 -1 = 50
+	end = start + pageSize - 1;						// 41+10 -1 = 50
 	if( end >cnt ) end = cnt;
 	
 	number = cnt - ( currentPage - 1) * pageSize; 	// 50 - ( 1 - 1) * 10
+	
+	//페이지번호 계산
+	pageCount = cnt / pageSize + ( cnt % pageSize > 0 ? 1 : 0 );
+	startPage = (currentPage / pageBlock) * pageBlock +1;
+				//	(5 / 10) * 10 + 1				1
+				//  (9 / 10) * 10 +1 				1
+				
+	if( currentPage % pageBlock ==0 ) startPage -=pageBlock;
+	endPage = startPage + pageBlock - 1;
+				// 1 + 10 -1    						10
+	if( endPage > pageCount  ) endPage=pageCount;
 	
 	%>
 	
@@ -92,7 +110,7 @@
 							<%
 						}
 					%>
-					<a href="content.jsp?pageNum=<%=pageNum%>&num=<%=boardDto.getNum()%>">
+					<a href="content.jsp?pageNum=<%=pageNum%>&num=<%=boardDto.getNum()%>&number=<%=number+1%>">
 						<%=boardDto.getSubject() %>
 					</a>
 				</td>
@@ -117,6 +135,34 @@
 	}
 	 %>
 </table>
+<br>
+<%
+	if( cnt > 0 ) {
+		if( startPage > pageBlock ) {
+			%>
+			<a href="list.jsp">[◀◀]</a>
+			<a href="list.jsp?pageNum=<%=startPage-pageBlock%>">[◀]</a>
+			<%	
+		}		
+		for( int i=startPage; i<=endPage; i++ ) {
+			if( i == currentPage ) {
+				%>	
+				<b>[<%=i%>]</b>				
+				<%
+			} else {
+				%>	
+				<a href="list.jsp?pageNum=<%=i%>">[<%=i%>]</a>				
+				<%
+			}
+		}		
+		if( pageCount > endPage ) {
+			%>
+			<a href="list.jsp?pageNum=<%=startPage+pageBlock%>">[▶]</a>
+			<a href="list.jsp?pageNum=<%=pageCount%>">[▶][▶]</a>
+			<%
+		}		
+	}
+%>
 
 
 
