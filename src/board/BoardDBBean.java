@@ -50,7 +50,7 @@ public class BoardDBBean {
 			}
 		}
 		return count;
-	}//getCount
+	}
 	
 	public int insertArticle( BoardDataBean boardDto ) {
 		int result = 0;
@@ -58,7 +58,7 @@ public class BoardDBBean {
 		PreparedStatement pstmt = null;
 		ResultSet rs = null;
 		try {
-			
+			con = getConnection();
 			
 			/*						ref			re_step		re_level
 			 * 10 제목글			9			0				0	
@@ -80,14 +80,12 @@ public class BoardDBBean {
 			 * 09 ㄴ 답글			9			2				1
 			 * 08    ㄴ 재답글		9			3				2		
 			 */
-			con = getConnection();
-			String sql = null;
 			
 			int num = boardDto.getNum();
 			int ref = boardDto.getRef();
 			int re_step = boardDto.getRe_step();
 			int re_level = boardDto.getRe_level();
-			
+			String sql = null;
 			if( num == 0 ) {
 				// 제목글인 경우
 				sql = "select max(num) from board";
@@ -109,6 +107,7 @@ public class BoardDBBean {
 				pstmt = con.prepareStatement( sql );
 				pstmt.setInt( 1, ref );
 				pstmt.setInt( 2, re_step );
+				pstmt.executeUpdate();
 				re_step ++;
 				re_level ++;
 			}		
@@ -145,31 +144,28 @@ public class BoardDBBean {
 			}
 		}
 		return result;
-	}//insertArticle
+	}
 	
-	public ArrayList<BoardDataBean> getArticles( int start, int end ){
-		ArrayList<BoardDataBean> articles = null;
-		
+	public ArrayList<BoardDataBean> getArticles( int start, int end ) {
+		ArrayList <BoardDataBean> articles = null;
 		Connection con = null;
 		PreparedStatement pstmt = null;
 		ResultSet rs = null;
 		try {
 			con = getConnection();
 			String sql = "select num,writer,email,subject,passwd,";
-			sql+= "reg_date,ref,re_step,re_level,content,ip,readcount,r ";
-			sql+= "from (select num,writer,email,subject,passwd,reg_date,ref,re_step";
-			sql+= ",re_level,content,ip,readcount,rownum r from ";
-			sql+= "(select num,writer,email,subject,passwd,reg_date,ref,re_step,re_level ";
-			sql+= ",content,ip,readcount from board order by ref desc, re_step asc) ";
-			sql+= "order by ref desc, re_step asc ) where r >= ? and r <= ?";
-			
+				sql+= "reg_date,ref,re_step,re_level,content,ip,readcount,r ";
+				sql+= "from (select num,writer,email,subject,passwd,reg_date,ref,re_step";
+				sql+= ",re_level,content,ip,readcount,rownum r from ";
+				sql+= "(select num,writer,email,subject,passwd,reg_date,ref,re_step,re_level ";
+				sql+= ",content,ip,readcount from board order by ref desc, re_step asc) ";
+				sql+= "order by ref desc, re_step asc ) where r >= ? and r <= ?";
 			pstmt = con.prepareStatement( sql );
 			pstmt.setInt( 1, start );
 			pstmt.setInt( 2, end );
-			rs=pstmt.executeQuery();
-			
+			rs = pstmt.executeQuery();
 			if( rs.next() ) {
-				articles = new ArrayList<BoardDataBean>(end - start + 1);
+				articles = new ArrayList<BoardDataBean> ( end - start + 1 );
 				do {
 					BoardDataBean article = new BoardDataBean();
 					article.setNum( rs.getInt( "num" ) );
@@ -186,10 +182,9 @@ public class BoardDBBean {
 					article.setIp( rs.getString( "ip" ) );			
 					
 					articles.add( article );
-				}while (rs.next() );
-			}
-			
-			
+					
+				} while( rs.next() );			
+			}			
 		} catch (NamingException e) {
 			e.printStackTrace();
 		} catch (SQLException e) {
@@ -203,28 +198,22 @@ public class BoardDBBean {
 				e.printStackTrace();
 			}
 		}
-		
 		return articles;
-	}//getArticles
-	
+	}
 	
 	public BoardDataBean getArticle( int num ) {
 		BoardDataBean article = null;
-		
 		Connection con = null;
 		PreparedStatement pstmt = null;
 		ResultSet rs = null;
-		
 		try {
-			con =getConnection();
+			con = getConnection();
 			String sql = "select * from board where num=?";
-			pstmt = con.prepareStatement(sql);
-			pstmt.setInt(1, num);
+			pstmt = con.prepareStatement( sql );
+			pstmt.setInt( 1, num );
 			rs = pstmt.executeQuery();
-			
 			if( rs.next() ) {
 				article = new BoardDataBean();
-				
 				article.setNum( rs.getInt( "num" ) );
 				article.setWriter( rs.getString( "writer" ) );
 				article.setEmail( rs.getString( "email" ) );
@@ -236,15 +225,13 @@ public class BoardDBBean {
 				article.setRe_step( rs.getInt( "re_step" ) );
 				article.setRe_level( rs.getInt( "re_level" ) );
 				article.setContent( rs.getString( "content" ) );
-				article.setIp( rs.getString( "ip" ) );	
+				article.setIp( rs.getString( "ip" ) );					
 			}
-			
-			
 		} catch (NamingException e) {
 			e.printStackTrace();
 		} catch (SQLException e) {
 			e.printStackTrace();
-		}finally {
+		} finally {
 			try {
 				if( rs != null ) rs.close();
 				if( pstmt !=null ) pstmt.close();
@@ -252,37 +239,129 @@ public class BoardDBBean {
 			} catch( SQLException e ) {
 				e.printStackTrace();
 			}
-		}
-		
+		}		
 		return article;
-	}//getAricle
-	
+	}
 	
 	public void addCount( int num ) {
-		Connection con  = null;
+		Connection con = null;
 		PreparedStatement pstmt = null;
 		try {
 			con = getConnection();
 			String sql = "update board set readcount=readcount+1 where num=?";
-			pstmt = con.prepareStatement(sql);
-			pstmt.setInt(1, num);
-			pstmt.executeQuery();
-			
+			pstmt = con.prepareStatement( sql );
+			pstmt.setInt( 1, num );
+			pstmt.executeUpdate();
 		} catch (NamingException e) {
 			e.printStackTrace();
 		} catch (SQLException e) {
 			e.printStackTrace();
-		}finally {
+		} finally {
+			try {		
+				if( pstmt !=null ) pstmt.close();
+				if( con != null ) con.close();
+			} catch( SQLException e ) {
+				e.printStackTrace();
+			}
+		}			
+	}
+	
+	public int deleteArticle( int num ) {
+		int result = 0;
+		Connection con = null;
+		PreparedStatement pstmt = null;
+		ResultSet rs = null;
+		try {
+			con = getConnection();
+			BoardDataBean boardDto = getArticle( num );
+			int ref = boardDto.getRef();
+			int re_step = boardDto.getRe_step();
+			int re_level = boardDto.getRe_level();
+			String sql = "select * from board "
+						+ "where ref=? and re_step=?+1 and re_level>?";
+			pstmt = con.prepareStatement( sql );
+			pstmt.setInt( 1, ref );
+			pstmt.setInt( 2, re_step );
+			pstmt.setInt( 3, re_level );
+			rs = pstmt.executeQuery();
+			
+			if( rs.next() ) {
+				// 답글이 있다
+				result = -1;
+			} else {
+				// 답글이 없다
+				sql = "update board set re_step=re_step-1 "
+					+ "where ref=? and re_step>?";
+				if( pstmt != null ) pstmt.close();
+				pstmt = con.prepareStatement( sql );
+				pstmt.setInt( 1, ref );
+				pstmt.setInt( 2, re_step );
+				pstmt.executeUpdate();
+				
+				sql = "delete from board where num=?";
+				if( pstmt != null ) pstmt.close();
+				pstmt = con.prepareStatement( sql );
+				pstmt.setInt( 1, num );
+				result = pstmt.executeUpdate();						
+			}			
+		} catch (NamingException e) {
+			e.printStackTrace();
+		} catch (SQLException e) {
+			e.printStackTrace();
+		} finally {
+			try {
+				if( rs != null ) rs.close();
+				if( pstmt !=null ) pstmt.close();
+				if( con != null ) con.close();
+			} catch( SQLException e ) {
+				e.printStackTrace();
+			}
+		}				
+		return result;
+	}
+
+	public int modifyArticle( BoardDataBean boardDto ) {
+		int result = 0;
+		Connection con = null;
+		PreparedStatement pstmt = null;
+		try {
+			con = getConnection();
+			String sql = "update board set email=?, subject=?, content=?, passwd=? "
+						+ "where num=?";
+			pstmt = con.prepareStatement( sql );
+			pstmt.setString( 1, boardDto.getEmail() );
+			pstmt.setString( 2, boardDto.getSubject() );
+			pstmt.setString( 3, boardDto.getContent() );
+			pstmt.setString( 4, boardDto.getPasswd() );
+			pstmt.setInt( 5, boardDto.getNum() );
+			result = pstmt.executeUpdate();
+		} catch (NamingException e) {
+			e.printStackTrace();
+		} catch (SQLException e) {
+			e.printStackTrace();
+		} finally {
 			try {
 				if( pstmt !=null ) pstmt.close();
 				if( con != null ) con.close();
 			} catch( SQLException e ) {
 				e.printStackTrace();
 			}
-		}
-	}//addcount
+		}		
+		return result;
+	}
 	
 } // class
+
+
+
+
+
+
+
+
+
+
+
 
 
 

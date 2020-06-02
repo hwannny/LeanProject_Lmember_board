@@ -16,11 +16,10 @@
 	int number = Integer.parseInt( request.getParameter( "number" ) );
 %>
 <%
-	BoardDBBean boardDao = BoardDBBean.getInstance();	
+	BoardDBBean boardDao = BoardDBBean.getInstance();
 	BoardDataBean boardDto = boardDao.getArticle( num );
-	if( boardDto.getIp().equals(request.getRemoteAddr() )){
+	if( ! boardDto.getIp().equals( request.getRemoteAddr() ) )
 		boardDao.addCount( num );
-	}
 	
 %>
 
@@ -48,12 +47,14 @@
 	</tr>
 	<tr>
 		<th> <%=str_content%> </th>
-		<td colspan="3"><pre><%=boardDto.getContent()%></pre></td>
+		<td colspan="3"> <pre><%=boardDto.getContent()%></pre> </td>
 	</tr>
 	<tr>
 		<th colspan="4">
-			<input class="inputbutton" type="button" value="<%=btn_modify%>">
-			<input class="inputbutton" type="button" value="<%=btn_delete%>">
+			<input class="inputbutton" type="button" value="<%=btn_modify%>"
+				onclick="location='modifyForm.jsp?num=<%=boardDto.getNum()%>&pageNum=<%=pageNum%>'">
+			<input class="inputbutton" type="button" value="<%=btn_delete%>"
+				onclick="location='deleteForm.jsp?num=<%=boardDto.getNum()%>&pageNum=<%=pageNum%>'">
 			<input class="inputbutton" type="button" value="<%=btn_reply%>"
 				onclick="location='writeForm.jsp?num=<%=boardDto.getNum()%>&ref=<%=boardDto.getRef()%>&re_step=<%=boardDto.getRe_step()%>&re_level=<%=boardDto.getRe_level()%>'">
 			<input class="inputbutton" type="button" value="<%=btn_list%>"
@@ -61,6 +62,12 @@
 		</th>
 	</tr>
 </table>
+
+
+
+
+
+
 
 
 
