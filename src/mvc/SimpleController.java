@@ -19,8 +19,8 @@ public class SimpleController extends HttpServlet {
 	private HashMap<String, CommandHandler> handlerMap = new  HashMap<String, CommandHandler>();
 	
 	@Override
-	public void init(ServletConfig config) throws ServletException {
-		String configFile = config.getInitParameter("configFile");
+	public void init(ServletConfig config) throws ServletException {//ServletConfig는 web.xml의 config접속
+		String configFile = config.getInitParameter("configFile"); //web.xml의 configFile이라는 이름의 cofig를 가져온다
 		String fileName = config.getServletContext().getRealPath("/") + configFile; //앞의 서블릿 컨텍스트가 JSP의어플리케이션과 같다
 		
 		FileInputStream fis = null;
