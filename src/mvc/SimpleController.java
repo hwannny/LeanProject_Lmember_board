@@ -19,26 +19,29 @@ public class SimpleController extends HttpServlet {
 	private HashMap<String, CommandHandler> handlerMap = new  HashMap<String, CommandHandler>();
 	
 	@Override
+	//시작하자마자 실행되는 함수
 	public void init(ServletConfig config) throws ServletException {//ServletConfig는 web.xml의 config접속
-		String configFile = config.getInitParameter("configFile"); //web.xml의 configFile이라는 이름의 cofig를 가져온다
-		String fileName = config.getServletContext().getRealPath("/") + configFile; //앞의 서블릿 컨텍스트가 JSP의어플리케이션과 같다
+		//web.xml의 configFile이라는 이름의 cofig를 가져온다   ----  WEB-INF/handler.properties
+		String configFile = config.getInitParameter("configFile"); 
+		
+		//﻿http://localhost:8080/JSP/﻿ + WEB-INF/handler.properties
+		String fileName = config.getServletContext().getRealPath("/") + configFile; //파일경로, application.리얼패스와 같은 명령어
 		
 		FileInputStream fis = null;
 		Properties prop = new Properties();
 		try {
 			fis = new FileInputStream( fileName );
-			prop.load(fis);
+			prop.load(fis);// properties로 로드
 			Iterator<Object> iter =  prop.keySet().iterator(); //키만뽑아 셋으로 만들어줬다
 			
-			
 			//객체를 미리 생성해서 넣어준다
-			while( iter.hasNext() ) {//즉 키만있다
-				String command = (String)iter.next();
-				String handlerName = prop.getProperty(command);
-				Class<?> handlerClass = Class.forName(handlerName ); //클래스를 관리하는 클래스가 생긴거
-				CommandHandler handler = (CommandHandler)handlerClass.newInstance(); //이제 각각에 해당하는 핸드러 객체를 만든것이다
+			while( iter.hasNext() ) { //키를 가져온것
+				String command = (String)iter.next(); //오브젝트로 리턴하므로 string화
+				String handlerName = prop.getProperty(command);//키에 해당하는 맵핑값을 가져옴(ex, mvc.HelloHandler )
+				Class<?> handlerClass = Class.forName( handlerName ); //클래스를 관리하는 클래스가 생긴거,
+				CommandHandler handler = (CommandHandler)handlerClass.newInstance(); //이제 각각에 경로에 해당 하는 핸드러 객체를 만든것이다
 				
-				//객체를 꺼내준다
+				//사용 하기 위해 객체를 꺼내준다
 				handlerMap.put(command, handler );
 			}		
 		} catch (FileNotFoundException e) {
